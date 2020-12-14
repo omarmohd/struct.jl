@@ -1,0 +1,112 @@
+#rankdir=LR
+#size="30, 30"; ratio = fill;
+
+digraph struct {
+    
+	size="5,3"; ratio = fill;
+	node [style=filled, fontsize=15];
+	
+    t -> length[taillabel="(args)", headlabel="[d]"];
+    t -> range[taillabel="(1,length=d)", headlabel="[k]"];
+    
+    s -> length[taillabel="(args)", headlabel="[d]"];
+    s -> range[taillabel="(1,length=d)", headlabel="[k]"];
+    
+    r -> collect[taillabel="(args)", headlabel="[args]"];
+    r -> length[taillabel="(args)", headlabel="[n]"];
+    r -> cos[taillabel="(angle)", headlabel="[COS]"];
+    r -> sin[taillabel="(angle)", headlabel="[SIN]"];
+    r -> norm[taillabel="(args)", headlabel="[args]"];
+    
+    removeDups -> collect[taillabel="(Set(CW))", headlabel="[CW]"];
+    removeDups -> collect[taillabel="(map(sort,CW))", headlabel="[CWs]"];
+    removeDups -> Set[taillabel="(CW)"];
+    removeDups -> map[taillabel="(sort,CW)"];
+    
+    "len" -> length[taillabel="(self.body)"];
+    
+    set_name -> string[taillabel="(name)", headlabel="[self.name]"];
+    
+    clone -> deepcopy[taillabel="(self)", headlabel="[newObj]"];
+    
+    set_category -> string[taillabel="(category)", headlabel="[self.category]"];
+    
+    struct2lar -> evalStruct[taillabel="(structure)", headlabel="[listOfModels]"];
+    struct2lar -> Dict[taillabel="()", headlabel="[vertDict]"];
+    struct2lar -> length[taillabel="(listOfModels[1])", headlabel="[m]"];
+    struct2lar -> map[taillabel="(Lar.approxVal[7],V[:,v])", headlabel="[key]"];
+    struct2lar -> approxVal[taillabel="(7)"];
+    struct2lar -> get[taillabel="(vertDict,key,defaultValue)"];
+    struct2lar -> "push!"[taillabel="(outcell,index)"];
+    struct2lar -> "push!"[taillabel="(W,key)"];
+    struct2lar -> "push!"[taillabel="(outcell,vertDict[key])"];
+    struct2lar -> "append!"[taillabel="(larmodel[k],[outcell])"];
+    struct2lar -> "append!"[taillabel="(larmodel[1],W)"];
+    struct2lar -> hcat[taillabel="(larmodel[1]...)", headlabel="[V]"];
+    struct2lar -> convert[taillabel="(Lar.Cells,chain)"];
+    
+    embedTraversal -> length[taillabel="(obj.body)"];
+    embedTraversal -> isa[taillabel="(obj.body[i],Matrix)"];
+    embedTraversal -> "size"[taillabel="(mat)", headlabel="[d,d]"];
+    embedTraversal -> range[taillabel="(1,length=d)", headlabel="[h]"];
+    embedTraversal -> range[taillabel="(1,length=d)", headlabel="[k]"];
+    embedTraversal -> "push!"[taillabel="(cloned.body,[newMat])"];
+    embedTraversal -> isa[taillabel="(obj.body[i],Tuple)"];
+    embedTraversal -> isa[taillabel="(obj.body[i],Array)"];
+    embedTraversal -> length[taillabel="(obj.body[i])"];
+    embedTraversal -> deepcopy[taillabel="(obj.body[i])", headlabel="[V,FV,EV]"];
+    embedTraversal -> "size"[taillabel="(V,2)", headlabel="[ncols]"];
+    embedTraversal -> zeros[taillabel="(dimadd,ncols)", headlabel="[nmat]"];
+    embedTraversal -> "push!"[taillabel="(cloned.body,[(V,EV)]])"];
+    embedTraversal -> isa[taillabel="(obj.body[i],Struct)"];
+    embedTraversal -> Struct[taillabel="()", headlabel="[newObj]"];
+    embedTraversal -> zeros[taillabel="(dimadd)"];
+    embedTraversal -> "push!"[taillabel="(cloned.body,[embedTraversal(newObj,obj.body[i],obj.dim+n,suffix)])"];
+    embedTraversal -> embedTraversal[taillabel="(newObj,obj.body[i],obj.dim+n,suffix)"];
+    
+    embedStruct -> length[taillabel="(self.box[1])"];
+    embedStruct -> Struct[taillabel="()", headlabel="[cloned]"];
+    embedStruct -> zeros[taillabel="(dimadd)"];
+    embedStruct -> embedTraversal[taillabel="(cloned,self,n,suffix)", headlabel="[cloned]"];
+    
+    box -> isa[taillabel="(model,Matrix)"];
+    box -> isa[taillabel="(model,Struct)"];
+    box -> evalStruct[taillabel="(model)", headlabel="[listOfModels]"];
+    box -> box[taillabel="(listOfModels[1])", headlabel="[theMin,theMax]"];
+    box -> box[taillabel="(theModel)", headlabel="[modelMin,modelMax]"];
+    box -> enumerate[taillabel="(modelMin)", headlabel="[(k,val)]"];
+    box -> enumerate[taillabel="(modelMax)", headlabel="[(k,val)]"];
+    box -> isa[taillabel="(model,Tuple)"];
+    box -> isa[taillabel="(model,Array)"];
+    box -> minimum[taillabel="(V,dims=2)", headlabel="[theMin]"];
+    box -> maximum[taillabel="(V,dims=2)", headlabel="[theMax]"];
+    
+    apply -> collect[taillabel="(larmodel)", headlabel="[data]"];
+    box -> "size"[taillabel="(V)", headlabel="[m,n]"];
+    box -> fill[taillabel="(1.0,(1,n))"];
+    box -> Tuple[taillabel="(data)", headlabel="[larmodel]"];
+    
+    checkStruct -> isa[taillabel="(obj,Matrix)"];
+    checkStruct -> "size"[taillabel="(obj,1)"];
+    checkStruct -> isa[taillabel="(obj,Tuple)"];
+    checkStruct -> isa[taillabel="(obj,Array)"];
+    checkStruct -> length[taillabel="(obj[1][:,1])", headlabel="[dim]"];
+    checkStruct -> isa[taillabel="(obj,Struct)"];
+    checkStruct -> length[taillabel="(obj.box[1])"];
+    
+    traversal -> length[taillabel="(obj.body)"];
+    traversal -> isa[taillabel="(obj.body[i],Matrix)"];
+    traversal -> isa[taillabel="(obj.body[i],Tuple)"];
+    traversal -> isa[taillabel="(obj.body[i],Array)"];
+    traversal -> length[taillabel="(obj.body[i])"];
+    traversal -> apply[taillabel="(CTM,obj.body[i])", headlabel="[l]"];
+    traversal -> "push!"[taillabel="(scene,l)"];
+    traversal -> isa[taillabel="(obj.body[i],Struct)"];
+    traversal -> "push!"[taillabel="(stack,CTM)"];
+    traversal -> traversal[taillabel="(CTM,stack,obj.body[i],scene)"];
+    traversal -> "pop!"[taillabel="(stack)", headlabel="[CTM]"];
+    
+    evalStruct -> checkStruct[taillabel="(self.body)", headlabel="[dim]"];
+    evalStruct -> traversal[taillabel="(CTM,stack,self,[])", headlabel="[scene]"];
+    
+}
