@@ -1,0 +1,117 @@
+digraph struct {
+    rankdir=LR;
+    size="50, 50"; ratio = fill;
+    graph[nodesep="1.6 equally", ranksep="2.5 equally", fontname=arial];
+    node[style=filled, fontsize=130, fontname=arial];
+    edge[labelfontsize=100, arrowsize=5, fontname=arial];
+	
+    t[width=3.5];
+    t -> length[labelfontsize=0,taillabel="(args)", headlabel="[d]"];
+    t -> range[taillabel="(1,length=d)", headlabel="[k]", headport=s];
+    
+    s[width=3.5];
+    s -> length[labelfontsize=0,taillabel="(args)", headlabel="[d]"];
+    s -> range[taillabel="(1,length=d)", headlabel="[k]"];
+    
+    r[width=3.5];
+    r -> collect[taillabel="(args)", headlabel="[args]", tailport=n];
+    r -> length[labelfontsize=0,taillabel="(args)", headlabel="[n]"];
+    r -> cos[taillabel="(angle)", headlabel="[COS]"];
+    r -> sin[taillabel="(angle)", headlabel="[SIN]"];
+    r -> norm[taillabel="(args)", headlabel="[args]"];
+    
+    removeDups -> collect[taillabel="(Set(CW))", headlabel="[CW]"];
+    removeDups -> collect[labelfontsize=0,taillabel="(map(sort,CW))", headlabel="[CWs]"];
+    removeDups -> Set[taillabel="(CW)"];
+    removeDups -> map[taillabel="(sort,CW)"];
+    
+    "len" -> length[taillabel="(self.body)"];
+    
+    set_name -> string[taillabel="(name)", headlabel="[self.name]", headport=n];
+    
+    clone -> deepcopy[taillabel="(self)", headlabel="[newObj]"];
+    
+    set_category -> string[taillabel="(category)", headlabel="[self.category]"];
+    
+    struct2lar[];
+    struct2lar -> evalStruct[labelfontsize=0,taillabel="(structure)", taillabel=invis, headlabel="[listOfModels]"];
+    struct2lar -> Dict[labelfontsize=0,taillabel="()", headlabel="[vertDict]"];
+    struct2lar -> length[labelfontsize=0,taillabel="(listOfModels[1])", headlabel="[m]"];
+    struct2lar -> map[labelfontsize=0,taillabel="(Lar.approxVal[7],V[:,v])", headlabel="[key]"];
+    struct2lar -> approxVal[labelfontsize=0,taillabel="(7)"];
+    struct2lar -> get[labelfontsize=0,taillabel="(vertDict,key,defaultValue)"];
+    struct2lar -> "push!"[labelfontsize=0,taillabel="(outcell,index)"];
+    struct2lar -> "push!"[labelfontsize=0,taillabel="(W,key)"];
+    struct2lar -> "push!"[labelfontsize=0,taillabel="(outcell,vertDict[key])"];
+    struct2lar -> "append!"[labelfontsize=0,taillabel="(larmodel[k],[outcell])"];
+    struct2lar -> "append!"[labelfontsize=0,taillabel="(larmodel[1],W)"];
+    struct2lar -> hcat[labelfontsize=0,taillabel="(larmodel[1]...)", headlabel="[V]"];
+    struct2lar -> convert[labelfontsize=0,taillabel="(Lar.Cells,chain)"];
+    
+    embedTraversal -> box [style=invis];
+    embedTraversal -> length[labelfontsize=0,taillabel="(obj.body)"];
+    embedTraversal -> isa[labelfontsize=0,taillabel="(obj.body[i],Matrix)"];
+    embedTraversal -> "size"[labelfontsize=0,taillabel="(mat)", headlabel="[d,d]"];
+    embedTraversal -> range[labelfontsize=0,taillabel="(1,length=d)", headlabel="[h]", tailport=o];
+    embedTraversal -> range[labelfontsize=0,taillabel="(1,length=d)", headlabel="[k]"];
+    embedTraversal -> "push!"[labelfontsize=0,taillabel="(cloned.body,[newMat])"];
+    embedTraversal -> isa[labelfontsize=0,taillabel="(obj.body[i],Tuple)"];
+    embedTraversal -> isa[labelfontsize=0,taillabel="(obj.body[i],Array)"];
+    embedTraversal -> length[labelfontsize=0,taillabel="(obj.body[i])"];
+    embedTraversal -> deepcopy[labelfontsize=0,taillabel="(obj.body[i])", headlabel="[V,FV,EV]"];
+    embedTraversal -> "size"[labelfontsize=0,taillabel="(V,2)", headlabel="[ncols]"];
+    embedTraversal -> zeros[labelfontsize=0,taillabel="(dimadd,ncols)", headlabel="[nmat]"];
+    embedTraversal -> "push!"[labelfontsize=0,taillabel="(cloned.body,[(V,EV)]])"];
+    embedTraversal -> isa[labelfontsize=0,taillabel="(obj.body[i],Struct)"];
+    embedTraversal -> Struct[labelfontsize=0,taillabel="()", headlabel="[newObj]"];
+    embedTraversal -> zeros[labelfontsize=0,taillabel="(dimadd)"];
+    embedTraversal -> "push!"[labelfontsize=0,taillabel="(cloned.body,[embedTraversal(newObj,obj.body[i],obj.dim+n,suffix)])"];
+    embedTraversal -> embedTraversal[labelfontsize=0,taillabel="(newObj,obj.body[i],obj.dim+n,suffix)", headport=o, tailport=so];
+    
+    embedStruct -> length[taillabel="(self.box[1])"];
+    embedStruct -> Struct[taillabel="()", headlabel="[cloned]", headport=n];
+    embedStruct -> zeros[taillabel="(dimadd)"];
+    embedStruct -> embedTraversal[taillabel="(cloned,self,n,suffix)", headlabel="[cloned]"];
+    
+    box -> isa[labelfontsize=0,taillabel="(model,Matrix)"];
+    box -> isa[labelfontsize=0,taillabel="(model,Struct)"];
+    box -> evalStruct[labelfontsize=0,taillabel="(model)", headlabel="[listOfModels]"];
+    box -> box[labelfontsize=0,taillabel="(listOfModels[1])", headlabel="[theMin,theMax]"];
+    box -> box[labelfontsize=0,taillabel="(theModel)", headlabel="[modelMin,modelMax]"];
+    box -> enumerate[labelfontsize=0,taillabel="(modelMin)", headlabel="[(k,val)]"];
+    box -> enumerate[labelfontsize=0,taillabel="(modelMax)", headlabel="[(k,val)]"];
+    box -> isa[labelfontsize=0,taillabel="(model,Tuple)"];
+    box -> isa[labelfontsize=0,taillabel="(model,Array)"];
+    box -> minimum[labelfontsize=0,taillabel="(V,dims=2)", headlabel="[theMin]"];
+    box -> maximum[labelfontsize=0,taillabel="(V,dims=2)", headlabel="[theMax]"];
+    
+    apply -> collect[labelfontsize=0,taillabel="(larmodel)", headlabel="[data]", tailport=s];
+    apply -> "size"[taillabel="(V)", headlabel="[m,n]", headport=se];
+    apply -> fill[taillabel="(1.0,(1,n))"];
+    apply -> Tuple[taillabel="(data)", headlabel="[larmodel]", tailport=se];
+    
+    checkStruct -> isa[labelfontsize=0,taillabel="(obj,Matrix)"];
+    checkStruct -> "size"[labelfontsize=0,taillabel="(obj,1)"];
+    checkStruct -> isa[labelfontsize=0,taillabel="(obj,Tuple)"];
+    checkStruct -> isa[labelfontsize=0,taillabel="(obj,Array)"];
+    checkStruct -> length[labelfontsize=0,taillabel="(obj[1][:,1])", headlabel="[dim]"];
+    checkStruct -> isa[labelfontsize=0,taillabel="(obj,Struct)"];
+    checkStruct -> length[labelfontsize=0,taillabel="(obj.box[1])"];
+    
+    traversal -> length[labelfontsize=0,taillabel="(obj.body)"];
+    traversal -> isa[labelfontsize=0,taillabel="(obj.body[i],Matrix)"];
+    traversal -> isa[labelfontsize=0,taillabel="(obj.body[i],Tuple)"];
+    traversal -> isa[labelfontsize=0,taillabel="(obj.body[i],Array)"];
+    traversal -> length[labelfontsize=0,taillabel="(obj.body[i])"];
+    traversal -> apply[labelfontsize=0,taillabel="(CTM,obj.body[i])", headlabel="[l]"];
+    traversal -> "push!"[labelfontsize=0,taillabel="(scene,l)"];
+    traversal -> isa[labelfontsize=0,taillabel="(obj.body[i],Struct)"];
+    traversal -> "push!"[labelfontsize=0,taillabel="(stack,CTM)"];
+    traversal -> traversal[labelfontsize=0,taillabel="(CTM,stack,obj.body[i],scene)"];
+    traversal -> "pop!"[labelfontsize=0,taillabel="(stack)", headlabel="[CTM]"];
+    
+    evalStruct -> checkStruct[taillabel="(self.body)", headlabel="[dim]"];
+    evalStruct -> traversal[taillabel="(CTM,stack,self,[])", headlabel="[scene]"];
+    
+}
+
