@@ -113,3 +113,9 @@ Trasformazione della gerarchia in un unico sistema di coordinate, ovvero quello 
 Man a mano che il grafo viene visitato si può pensare che la matrice resti associata all’ultimo arco e quando si entra in un nodo per visitarne il sottoalbero di cui è radice, bisogna salvare lo stato corrente di questa matrice facendo un “push” della CTM su uno stack. Quando invece si esce dal sottoalbero, si fa un “pop” dello stack.
 
 ### <function evalStruct(self::Struct)>
+
+\pagebreak
+
+## Grafo delle dipendenze
+
+![grafo](./grafo_dipendenze.png){ width=115% }
