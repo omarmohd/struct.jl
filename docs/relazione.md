@@ -50,11 +50,11 @@ Restituisce la categoria della struttura di tipo “AbstractString”.
 
 ### <function len(self::Struct)>
 
-Restituisce la lunghezza del corpo(attributo “body” di tipo “Array”) della struttura.
+Restituisce la lunghezza del grafo(attributo “body” di tipo “Array”) della struttura.
 
 ### <function getItem(self::Struct,i::Int)>
 
-Restituisce l’oggetto con indice “i” nel corpo della struttura.
+Restituisce l’oggetto con indice “i” nel corpo(grafo) della struttura.
 
 ### <function setItem(self::Struct,i,value)>
 
@@ -78,7 +78,7 @@ Imposta la categoria della struttura a “category”.
 
 ### <function struct2lar(structure)>
 
-Restituisce una tupla(vertici,celle,spigoli) che consiste nella rappresentazione algebrica lineare della struttura in ingresso. Sostanzialmente trasforma la struttura fondamentalmente “appiattendola” in un’unica struttura dati di tipo LAR. //Trasforma la gerarchia in un solo modello LAR.
+Restituisce una tupla(vertici,celle,spigoli) che consiste nella rappresentazione algebrica lineare della struttura in ingresso. Sostanzialmente trasforma la struttura fondamentalmente “appiattendola” in un’unica struttura dati di tipo LAR. Trasforma la gerarchia in un solo modello LAR.
 
 ### <function embedTraversal(cloned::Struct,obj::Struct,n::Int,suffix::String)>
 
@@ -114,8 +114,10 @@ Man a mano che il grafo viene visitato si può pensare che la matrice resti asso
 
 ### <function evalStruct(self::Struct)>
 
+Esegue una valutazione della struttura "self" in ingresso. Inizializza una matrice CTM di dimensione "dimensione struttura + 1" x "dimensione struttura + 1" e ritorna la struttura traformata in coordinate mondo, chiamando la funzione "traversal".
+
 \pagebreak
 
 ## Grafo delle dipendenze
 
-![grafo](./grafo_dipendenze.png){ width=115% }
+![Grafo delle dipendenze](./grafo_dipendenze.png){ width=115% }

@@ -87,20 +87,26 @@ julia> Lar.r(1,1,1)		# 3D rotation about the ``x=y=z`` axis, with angle ``1.7320
   0.0        0.0        0.0       1.0
 ```
 """
-function r(args...)
-    args = collect(args)
+
+function r2D(args...)
+	args = collect(args)
     n = length(args)
     if n == 1 # rotation in 2D
         angle = args[1]; COS = cos(angle); SIN = sin(angle)
         mat = Matrix{Float64}(LinearAlgebra.I, 3, 3)
         mat[1,1] = COS;    mat[1,2] = -SIN;
         mat[2,1] = SIN;    mat[2,2] = COS;
-    end
+	end
+	return mat
+end
 
-     if n == 3 # rotation in 3D
-        mat = Matrix{Float64}(LinearAlgebra.I, 4, 4)
-        angle = norm(args);
-        if norm(args) != 0.0
+function r3D(args...)
+	args = collect(args)
+    n = length(args)
+	if n == 3 # rotation in 3D
+		mat = Matrix{Float64}(LinearAlgebra.I, 4, 4)
+		angle = norm(args);
+		if norm(args) != 0.0
 			axis = args #normalize(args)
 			COS = cos(angle); SIN= sin(angle)
 			if axis[2]==axis[3]==0.0    # rotation about x
@@ -109,15 +115,15 @@ function r(args...)
 			elseif axis[1]==axis[3]==0.0   # rotation about y
 				mat[1,1] = COS;    mat[1,3] = SIN;
 				mat[3,1] = -SIN;    mat[3,3] = COS;
-			elseif axis[1]==axis[2]==0.0    # rotation about z
+		    elseif axis[1]==axis[2]==0.0    # rotation about z
 				mat[1,1] = COS;    mat[1,2] = -SIN;
 				mat[2,1] = SIN;    mat[2,2] = COS;
-			else
+		    else
 				I = Matrix{Float64}(LinearAlgebra.I, 3, 3); u = axis
-				Ux=[0 -u[3] u[2] ; u[3] 0 -u[1] ;  -u[2] u[1] 1]
-				UU =[u[1]*u[1]    u[1]*u[2]   u[1]*u[3];
-					 u[2]*u[1]    u[2]*u[2]   u[2]*u[3];
-					 u[3]*u[1]    u[3]*u[2]   u[3]*u[3]]
+			    Ux=[0 -u[3] u[2] ; u[3] 0 -u[1] ;  -u[2] u[1] 1]
+			    UU =[u[1]*u[1]    u[1]*u[2]   u[1]*u[3];
+				u[2]*u[1]    u[2]*u[2]   u[2]*u[3];
+				u[3]*u[1]    u[3]*u[2]   u[3]*u[3]]
 				mat[1:3,1:3]=COS*I+SIN*Ux+(1.0-COS)*UU
 			end
 		end
@@ -125,15 +131,63 @@ function r(args...)
 	return mat
 end
 
+#function r(args...)
+#    args = collect(args)
+#    n = length(args)
+#    if n == 1 # rotation in 2D
+#        angle = args[1]; COS = cos(angle); SIN = sin(angle)
+#        mat = Matrix{Float64}(LinearAlgebra.I, 3, 3)
+#        mat[1,1] = COS;    mat[1,2] = -SIN;
+#        mat[2,1] = SIN;    mat[2,2] = COS;
+#    end
+#
+#     if n == 3 # rotation in 3D
+#        mat = Matrix{Float64}(LinearAlgebra.I, 4, 4)
+    #    angle = norm(args);
+#        if norm(args) != 0.0
+#			axis = args #normalize(args)
+	#		COS = cos(angle); SIN= sin(angle)
+#			if axis[2]==axis[3]==0.0    # rotation about x
+#				mat[2,2] = COS;    mat[2,3] = -SIN;
+#				mat[3,2] = SIN;    mat[3,3] = COS;
+	#		elseif axis[1]==axis[3]==0.0   # rotation about y
+	#			mat[1,1] = COS;    mat[1,3] = SIN;
+#				mat[3,1] = -SIN;    mat[3,3] = COS;
+	#		elseif axis[1]==axis[2]==0.0    # rotation about z
+	#			mat[1,1] = COS;    mat[1,2] = -SIN;
+#				mat[2,1] = SIN;    mat[2,2] = COS;
+	#		else
+	#			I = Matrix{Float64}(LinearAlgebra.I, 3, 3); u = axis
+	#			Ux=[0 -u[3] u[2] ; u[3] 0 -u[1] ;  -u[2] u[1] 1]
+#				UU =[u[1]*u[1]    u[1]*u[2]   u[1]*u[3];
+	#				 u[2]*u[1]    u[2]*u[2]   u[2]*u[3];
+#					 u[3]*u[1]    u[3]*u[2]   u[3]*u[3]]
+	#			mat[1:3,1:3]=COS*I+SIN*Ux+(1.0-COS)*UU
+#			end
+#		end
+#	end
+#	return mat
+#end
+
 """
 	removeDups(CW::Cells)::Cells
-Remove dublicate `cells` from `Cells` object. Then put `Cells` in *canonical form*, i.e. with *sorted indices* of vertices in each (unique) `Cells` Array element.
+Remove duplicate `cells` from `Cells` object. Then put `Cells` in *canonical form*, i.e. with *sorted indices* of vertices in each (unique) `Cells` Array element.
 """
+
 function removeDups(CW::Cells)::Cells
 	CW = collect(Set(CW))
+end
+
+function sortCells(CW::Cells)::Cells
 	CWs = collect(map(sort,CW))
 	return CWs
 end
+
+#function removeDups(CW::Cells)::Cells
+#	CW = collect(Set(CW))
+#	CWs = collect(map(sort,CW))
+#	return CWs
+#end
 
 """
 	Struct
