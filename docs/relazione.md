@@ -90,7 +90,7 @@ Definisce la funzione “embedStruct0”.
 
 ### <function embedStruct0(self::Struct,suffix::String="New")>
 
-Restituisce una struttura che è la copia della struttura “self” passata come parametro, dove però la dimensione è aumentata del fattore “n” e al nome è posto il suffisso “new”. Per copiare il body è chiamata “embedTraversal”.
+Restituisce una struttura che è la copia della struttura “self” passata come parametro, dove però la dimensione è aumentata del fattore “n” e al nome è posto il suffisso “New”. Per copiare il body è chiamata “embedTraversal”.
 
 ### <function box(model)>
 
