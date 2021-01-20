@@ -139,25 +139,25 @@ function r2D(args)
 	return mat
 end
 
-function rX(mat)
+function rX(mat,COS,SIN)
 	mat[2,2] = COS;    mat[2,3] = -SIN;
 	mat[3,2] = SIN;    mat[3,3] = COS;
 	return mat
 end
 
-function rY(mat)
+function rY(mat,COS,SIN)
 	mat[1,1] = COS;    mat[1,3] = SIN;
 	mat[3,1] = -SIN;    mat[3,3] = COS;
 	return mat
 end
 
-function rZ(mat)
+function rZ(mat,COS,SIN)
 	mat[1,1] = COS;    mat[1,2] = -SIN;
 	mat[2,1] = SIN;    mat[2,2] = COS;
 	return mat
 end
 
-function rAxis(mat, axis)
+function rAxis(mat,axis,COS,SIN)
 	I = Matrix{Float64}(LinearAlgebra.I, 3, 3); u = axis
 	Ux=[0 -u[3] u[2] ; u[3] 0 -u[1] ;  -u[2] u[1] 1]
 	UU =[u[1]*u[1]    u[1]*u[2]   u[1]*u[3];
@@ -174,13 +174,13 @@ function r3D(args)
 		 axis = args #normalize(args)
 		 COS = cos(angle); SIN= sin(angle)
 		 if axis[2]==axis[3]==0.0    # rotation about x
-			 mat = rX(mat)
+			 mat = rX(mat,COS,SIN)
 		 elseif axis[1]==axis[3]==0.0   # rotation about y
-			 mat = rY(mat)
+			 mat = rY(mat,COS,SIN)
 		 elseif axis[1]==axis[2]==0.0    # rotation about z
-			 mat = rZ(mat)
+			 mat = rZ(mat,COS,SIN)
 		 else
-			 mat = rAxis(mat)
+			 mat = rAxis(mat,COS,SIN)
 		 end
 	 end
 	 return mat
@@ -243,17 +243,17 @@ end
 Remove duplicate `cells` from `Cells` object. Then put `Cells` in *canonical form*, i.e. with *sorted indices* of vertices in each (unique) `Cells` Array element.
 """
 
-function sortCells(CW)
+function sortCells(CW::Lar.Cells)::Lar.Cells
 	CWs = collect(map(sort,CW))
 	return CWs
 end
 
-function removeDups(CW)
+function removeDups(CW::Lar.Cells)::Lar.Cells
 	CW = collect(Set(CW))
 	sortCells(CW)
 end
 
-# function removeDups(CW)::Cells
+# function removeDups(CW::Cells)::Cells
 # 	CW = collect(Set(CW))
 # 	CWs = collect(map(sort,CW))
 # 	return CWs
@@ -297,11 +297,11 @@ mutable struct Struct
 	body::Array
 	box
 	name::AbstractString
-	dim
+	dim::Int
 	category::AbstractString
 
 	function Struct()
-		self = new([],Any,"new",Any,"feature")
+		self = new([],Any,"new",0,"feature")
 		self.name = string(objectid(self))
 		return self
 	end
@@ -314,7 +314,7 @@ mutable struct Struct
 		return self
 	end
 
-	function Struct(data::Array,name)
+	function Struct(data::Array,name::AbstractString)
 		self = Struct()
 		self.body=[item for item in data]
 		self.box = box(self)
@@ -323,7 +323,7 @@ mutable struct Struct
 		return self
 	end
 
-	function Struct(data::Array,name,category)
+	function Struct(data::Array,name::AbstractString,category::AbstractString)
 		self = Struct()
 		self.body = [item for item in data]
 		self.box = box(self)
@@ -348,13 +348,13 @@ end
 	function getitem(self::Struct,i::Int)
 		return self.body[i]
 	end
-	function setitem(self::Struct,i,value)
+	function setitem(self::Struct,i::Int,value::Int)
 		self.body[i]=value
 	end
 	function pprint(self::Struct)
 		return "<Struct name: $(self.name)"
 	end
-	function set_name(self::Struct,name)
+	function set_name(self::Struct,name::AbstractString)
 		self.name = string(name)
 	end
 	function clone(self::Struct,i=0)
@@ -364,7 +364,7 @@ end
 		end
 		return newObj
 	end
-	function set_category(self::Struct,category)
+	function set_category(self::Struct,category::AbstractString)
 		self.category = string(category)
 	end
 
@@ -401,7 +401,7 @@ function flatten(listOfModels)
 end
 
 function struct2lar(structure)
-	listOfModels = Lar.evalStruct(structure)
+	listOfModels = evalStruct(structure)
 
 	larmodel,W = flatten(listOfModels)
 
@@ -472,14 +472,14 @@ function embedTraversalTupleOrArray(n,V)
 end
 
 function embedTraversalStruct(objBody)
-	newObj = Lar.Struct()
+	newObj = Struct()
 	newObj.box = [ [objBody[i].box[1];zeros(dimadd)],
 				   [objBody[i].box[2];zeros(dimadd)] ]
 	newObj.category = (objBody[i]).category
 	return
 end
 
-function embedTraversal(cloned::Lar.Struct,obj::Struct,n::Int,suffix::String)
+function embedTraversal(cloned::Struct,obj::Struct,n::Int,suffix::String)
 	objBody = obj.body
 	for i=1:length(objBody)
 		if isa(objBody[i],Matrix)
@@ -546,16 +546,16 @@ end
 """
 
 function embedStruct(n::Int)
-	function embedStruct0(self::Lar.Struct,suffix::String="New")
+	function embedStruct0(self::Struct,suffix::String="New")
 		if n==0
 			return self, length(self.box[1])
 		end
-		cloned = Lar.Struct()
+		cloned = Struct()
 		cloned.box = hcat((self.box,[fill([0],n),fill([0],n)]))
 		cloned.name = self.name*suffix
 		cloned.category = self.category
 		cloned.dim = self.dim+n
-		cloned = Lar.embedTraversal(cloned,self,n,suffix)
+		cloned = embedTraversal(cloned,self,n,suffix)
 		return cloned
 	end
 	return embedStruct0
@@ -603,13 +603,13 @@ end
 function box(model)
 	if isa(model,Matrix)
 		return nothing
-	elseif isa(model,Lar.Struct)
-		listOfModels = Lar.evalStruct(model)
+	elseif isa(model,Struct)
+		listOfModels = evalStruct(model)
 		#dim = checkStruct(listOfModels)
 		if listOfModels == []
 			return model.box
 		else
-			theMin,theMax = Lar.evalBox(listOfModels)
+			theMin,theMax = evalBox(listOfModels)
 		end
 		return [theMin,theMax]
 
