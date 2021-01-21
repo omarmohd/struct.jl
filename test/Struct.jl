@@ -85,6 +85,24 @@ end
 	@test Struct([square]).body[1]==square
 end
 
+# @testset "embedTraversal Tests" begin
+# 	square = Lar.cuboid([1,1])
+# 	x = Struct([square])
+# 	cube = Lar.cuboid([1,1,1])
+# 	y = Struct([cube])
+# 	length(x.body)
+# 	length(x.body[1])
+# 	length(y.body[1])
+# 	typeof(x.body[1])
+# 	isa(x.body[1],Tuple)
+#
+# 	@test length(embedTraversal(Struct(),x,1,"New").body[1][1])==length(x.body[1][1][1])+1
+# 	#in this case n=1, but generally:
+# 	# length(length(embedTraversal(x,x,1,"New")=length(x.body[1][1][1])+n
+# 	@test length(embedTraversal(Struct(),deepcopy(x),3,"New").body[1][1])?==length(x.body[1][1][1])+3
+# 	@test typeof(embedTraversal(Struct(),deepcopy(x),1,"New"))==Struct
+# end
+
 # to test
 #@testset "embedTraversal Tests" begin
 #	square = Lar.cuboid([1,1])
