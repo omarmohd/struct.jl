@@ -85,23 +85,60 @@ end
 	@test Struct([square]).body[1]==square
 end
 
-# @testset "embedTraversal Tests" begin
-# 	square = Lar.cuboid([1,1])
-# 	x = Struct([square])
-# 	cube = Lar.cuboid([1,1,1])
-# 	y = Struct([cube])
-# 	length(x.body)
-# 	length(x.body[1])
-# 	length(y.body[1])
-# 	typeof(x.body[1])
-# 	isa(x.body[1],Tuple)
-#
-# 	@test length(embedTraversal(Struct(),x,1,"New").body[1][1])==length(x.body[1][1][1])+1
-# 	#in this case n=1, but generally:
-# 	# length(length(embedTraversal(x,x,1,"New")=length(x.body[1][1][1])+n
-# 	@test length(embedTraversal(Struct(),deepcopy(x),3,"New").body[1][1])?==length(x.body[1][1][1])+3
-# 	@test typeof(embedTraversal(Struct(),deepcopy(x),1,"New"))==Struct
-# end
+@testset "embedTraversal Tests" begin
+	square = Lar.cuboid([1,1])
+	x = Struct([square])
+	length(x.body)
+	length(x.body[1])
+	typeof(x.body[1])
+	isa(x.body[1],Tuple)
+
+	table = apply(t(-0.5,-0.5),square)
+	structure = Struct([repeat([table,r(pi/2)],outer=2)...])
+	length(structure.body[3])
+	typeof(structure.body[1])
+	typeof(structure.body[2])
+	isa(typeof([newMat]),Matrix)
+
+	@testset "embedTraversal Tests tuple body" begin
+		@test typeof(embedTraversal(Struct(),deepcopy(x),1,"New"))==Struct
+		#l'unico elemento del body di x è una tupla, viene eseguita la funzione embedTraversalTupleOrArray
+		@test typeof(embedTraversal(Struct(),deepcopy(x),1,"New").body[1][1])==Tuple{Matrix{Float64},Array{Array{Int64,1},1}}
+
+		# in questi tre casi n=1, n=2 e n=3, ma in generale:
+		# length(embedTraversal(Struct(),x,n,"New").body[1][1][1])=length(x.body[1][1])+4*n
+		@test length(embedTraversal(Struct(),deepcopy(x),1,"New").body[1][1][1])==length(x.body[1][1])+4*1
+		@test length(embedTraversal(Struct(),deepcopy(x),2,"New").body[1][1][1])==length(x.body[1][1])+4*2
+		@test length(embedTraversal(Struct(),deepcopy(x),3,"New").body[1][1][1])==length(x.body[1][1])+4*3
+	end
+
+	@testset "embedTraversal Tests matrix body" begin
+		@test typeof(embedTraversal(Struct(),deepcopy(structure),1,"New"))==Struct
+		#il primo elemento del body di structure è una tupla, viene eseguita la funzione embedTraversalTupleOrArray
+		@test typeof(embedTraversal(Struct(),deepcopy(structure),1,"New").body[1][1])==Tuple{Matrix{Float64},Array{Array{Int64,1},1}}
+		#il secondo elemento del body di structure è una matrice, viene eseguita la funzione embedTraversalMatrix
+		@test typeof(embedTraversal(Struct(),deepcopy(structure),1,"New").body[2][1])==Matrix{Float64}
+
+		# in questi tre casi n=1, n=2 e n=3, ma in generale:
+		# length(embedTraversal(Struct(),x,n,"New").body[1][1][1])=length(x.body[1][1])+4*n
+		@test length(embedTraversal(Struct(),deepcopy(structure),1,"New").body[1][1][1])==length(structure.body[1][1])+4*1
+		@test length(embedTraversal(Struct(),deepcopy(structure),2,"New").body[1][1][1])==length(structure.body[1][1])+4*2
+		@test length(embedTraversal(Struct(),deepcopy(structure),3,"New").body[1][1][1])==length(structure.body[1][1])+4*3
+
+		# in questi quattro casi n=1, n=2, n=3 e n=4, ma in generale:
+		# length(embedTraversal(Struct(),x,n,"New").body[2][1])=length(x.body[2])+((6+n)*n)
+		@test length(embedTraversal(Struct(),deepcopy(structure),1,"New").body[2][1])==length(structure.body[2])+7*1
+		@test length(embedTraversal(Struct(),deepcopy(structure),2,"New").body[2][1])==length(structure.body[2])+8*2
+		@test length(embedTraversal(Struct(),deepcopy(structure),3,"New").body[2][1])==length(structure.body[2])+9*3
+		@test length(embedTraversal(Struct(),deepcopy(structure),4,"New").body[2][1])==length(structure.body[2])+10*4
+
+		# la dimensione della matrice nel body aumenta di n, in questo caso n=2, ma in generale:
+		# size(embedTraversal(Struct(),x,n,"New").body[indiceMatrice][1])=
+		# (size(structure.body[indiceMatrice])[1]+n,size(structure.body[indiceMatrice])[2]+n)
+		@test size(embedTraversal(Struct(),deepcopy(structure),2,"New").body[2][1])==
+		(size(structure.body[2])[1]+2,size(structure.body[2])[2]+2)
+	end
+end
 
 # to test
 #@testset "embedTraversal Tests" begin
@@ -115,6 +152,21 @@ end
 #	length(x.body[1][1][1])+3
 #	@test typeof(embedTraversal(deepcopy(x),deepcopy(x),1,"New"))==Struct
 #end
+
+# @testset "embedStruct Tests" begin
+# 	square = Lar.cuboid([1,1])
+# 	x = Lar.Struct([square])
+# 	suffix="-New"
+#
+# 	embedStruc(1)(x,suffix)
+# 	@test length(embedStruct(1)(x,"-New").body[1][1][1])==length(x.body[1][1][1])+1
+#
+# 	@test length(embedStruct(1)(x,suffix).body[1][1][1])==length(x.body[1][1][1])+1
+# 	#in this case n = 1, but generally:
+# 	#length(embedStruct(n)(x).body[1][1][1])=length(x.body[1][1][1])+n
+# 	@test length(embedStruct(3)(x,suffix).body[1][1][1])==length(x.body[1][1][1])+3
+# 	@test typeof(embedStruct(1)(x,suffix))==Struct
+# end
 
 #@testset "embedStruct Tests" begin
 #	square = Lar.cuboid([1,1])

@@ -451,102 +451,102 @@ end
 # TODO:  debug embedTraversal
 """
 
-# function embedTraversalMatrix(objBody)
-# 	mat = objBody[i]
-# 	d,d = size(mat)
-# 	newMat = Matrix{Float64}(LinearAlgebra.I, d+n, d+n)
-# 	for h in range(1, length=d)
-# 		for k in range(1, length=d)
-# 			newMat[h,k]=mat[h,k]
-# 		end
-# 	end
-# 	return newMat
-# end
-#
-# function embedTraversalTupleOrArray(n,V)
-# 	dimadd = n
-# 	ncols = size(V,2)
-# 	nmat = zeros(dimadd,ncols)
-# 	V = [V;nmat]
-# 	return V
-# end
-#
-# function embedTraversalStruct(objBody)
-# 	newObj = Struct()
-# 	newObj.box = [ [objBody[i].box[1];zeros(dimadd)],
-# 				   [objBody[i].box[2];zeros(dimadd)] ]
-# 	newObj.category = (objBody[i]).category
-# 	return
-# end
-#
-# function embedTraversal(cloned::Struct,obj::Struct,n::Int,suffix::String)
-# 	objBody = obj.body
-# 	for i=1:length(objBody)
-# 		if isa(objBody[i],Matrix)
-# 			newMat = embedTraversalMatrix(objBody)
-# 			push!(cloned.body,[newMat])
-# 		elseif (isa(objBody[i],Tuple) || isa(objBody[i],Array))
-# 			if (length(objBody[i])==3)
-# 				V,FV,EV = deepcopy(objBody[i])
-# 				V = embedTraversalTupleOrArray(n,V)
-# 				push!(cloned.body,[(V,FV,EV)])
-# 			elseif (length(objBody[i])==2)
-# 				V,EV = deepcopy(objBody[i])
-# 				V = embedTraversalTupleOrArray(n,V)
-# 				push!(cloned.body,[(V,EV)])
-# 			end
-# 		elseif isa(objBody[i],Struct)
-# 			newObj = embedTraversalStruct(objBody)
-# 			push!(cloned.body,[embedTraversal(newObj,objBody[i],obj.dim+n,suffix)])
-# 		end
-# 	end
-# 	return cloned
-# end
+function embedTraversalMatrix(objBody,i,n)
+	mat = objBody[i]
+	d,d = size(mat)
+	newMat = Matrix{Float64}(LinearAlgebra.I, d+n, d+n)
+	for h in range(1, length=d)
+		for k in range(1, length=d)
+			newMat[h,k]=mat[h,k]
+		end
+	end
+	return newMat
+end
 
-function embedTraversal(cloned::Struct,obj::Struct,n::Int,suffix::String)
-	for i=1:length(obj.body)
-		if isa(obj.body[i],Matrix)
-			mat = obj.body[i]
-			d,d = size(mat)
-			newMat = Matrix{Float64}(LinearAlgebra.I, d+n, d+n)
-			for h in range(1, length=d)
-				for k in range(1, length=d)
-					newMat[h,k]=mat[h,k]
-				end
-			end
+function embedTraversalTupleOrArray(n,V)
+	dimadd = n
+	ncols = size(V,2)
+	nmat = zeros(dimadd,ncols)
+	V = [V;nmat]
+	return V
+end
+
+function embedTraversalStruct(objBody,i)
+	newObj = Struct()
+	newObj.box = [ [objBody[i].box[1];zeros(dimadd)],
+				   [objBody[i].box[2];zeros(dimadd)] ]
+	newObj.category = (objBody[i]).category
+	return
+end
+
+function embedTraversal(cloned,obj,n,suffix)
+	objBody = obj.body
+	for i=1:length(objBody)
+		if isa(objBody[i],Matrix)
+			newMat = embedTraversalMatrix(objBody,i,n)
 			push!(cloned.body,[newMat])
-		elseif (isa(obj.body[i],Tuple) ||isa(obj.body[i],Array))&& length(obj.body[i])==3
-			V,FV,EV = deepcopy(obj.body[i])
-			dimadd = n
-			ncols = size(V,2)
-			nmat = zeros(dimadd,ncols)
-			V = [V;zeros(dimadd,ncols)]
-			push!(cloned.body,[(V,FV,EV)])
-		elseif  (isa(obj.body[i],Tuple) ||isa(obj.body[i],Array))&& length(obj.body[i])==2
-			V,EV = deepcopy(obj.body[i])
-			dimadd = n
-			ncols = size(V,2)
-			nmat = zeros(dimadd,ncols)
-			V = [V;zeros(dimadd,ncols)]
-			push!(cloned.body,[(V,EV)])
-		elseif isa(obj.body[i],Struct)
-			newObj = Struct()
-			newObj.box = [ [obj.body[i].box[1];zeros(dimadd)],
-							[obj.body[i].box[2];zeros(dimadd)] ]
-			newObj.category = (obj.body[i]).category
-			push!(cloned.body,[embedTraversal(newObj,obj.body[i],obj.dim+n,suffix)])
+		elseif (isa(objBody[i],Tuple) || isa(objBody[i],Array))
+			if (length(objBody[i])==3)
+				V,FV,EV = deepcopy(objBody[i])
+				V = embedTraversalTupleOrArray(n,V)
+				push!(cloned.body,[(V,FV,EV)])
+			elseif (length(objBody[i])==2)
+				V,EV = deepcopy(objBody[i])
+				V = embedTraversalTupleOrArray(n,V)
+				push!(cloned.body,[(V,EV)])
+			end
+		elseif isa(objBody[i],Struct)
+			newObj = embedTraversalStruct(objBody,i)
+			push!(cloned.body,[embedTraversal(newObj,objBody[i],obj.dim+n,suffix)])
 		end
 	end
 	return cloned
 end
+
+# function embedTraversal(cloned::Struct,obj::Struct,n::Int,suffix::String)
+# 	for i=1:length(obj.body)
+# 		if isa(obj.body[i],Matrix)
+# 			mat = obj.body[i]
+# 			d,d = size(mat)
+# 			newMat = Matrix{Float64}(LinearAlgebra.I, d+n, d+n)
+# 			for h in range(1, length=d)
+# 				for k in range(1, length=d)
+# 					newMat[h,k]=mat[h,k]
+# 				end
+# 			end
+# 			push!(cloned.body,[newMat])
+# 		elseif (isa(obj.body[i],Tuple) ||isa(obj.body[i],Array))&& length(obj.body[i])==3
+# 			V,FV,EV = deepcopy(obj.body[i])
+# 			dimadd = n
+# 			ncols = size(V,2)
+# 			nmat = zeros(dimadd,ncols)
+# 			V = [V;zeros(dimadd,ncols)]
+# 			push!(cloned.body,[(V,FV,EV)])
+# 		elseif  (isa(obj.body[i],Tuple) ||isa(obj.body[i],Array))&& length(obj.body[i])==2
+# 			V,EV = deepcopy(obj.body[i])
+# 			dimadd = n
+# 			ncols = size(V,2)
+# 			nmat = zeros(dimadd,ncols)
+# 			V = [V;zeros(dimadd,ncols)]
+# 			push!(cloned.body,[(V,EV)])
+# 		elseif isa(obj.body[i],Struct)
+# 			newObj = Struct()
+# 			newObj.box = [ [obj.body[i].box[1];zeros(dimadd)],
+# 							[obj.body[i].box[2];zeros(dimadd)] ]
+# 			newObj.category = (obj.body[i]).category
+# 			push!(cloned.body,[embedTraversal(newObj,obj.body[i],obj.dim+n,suffix)])
+# 		end
+# 	end
+# 	return cloned
+# end
 
 """
 	embedStruct(n::Int)(self::Struct,suffix::String="New")
 # TODO:  debug embedStruct
 """
 
-function embedStruct(n::Int)
-	function embedStruct0(self::Struct,suffix::String="New")
+function embedStruc(n)
+	function embedStruct0(self, suffix)
 		if n==0
 			return self, length(self.box[1])
 		end
