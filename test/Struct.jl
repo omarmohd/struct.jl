@@ -88,17 +88,9 @@ end
 @testset "embedTraversal Tests" begin
 	square = Lar.cuboid([1,1])
 	x = Struct([square])
-	length(x.body)
-	length(x.body[1])
-	typeof(x.body[1])
-	isa(x.body[1],Tuple)
 
 	table = apply(t(-0.5,-0.5),square)
 	structure = Struct([repeat([table,r(pi/2)],outer=2)...])
-	length(structure.body[3])
-	typeof(structure.body[1])
-	typeof(structure.body[2])
-	isa(typeof([newMat]),Matrix)
 
 	@testset "embedTraversal Tests tuple body" begin
 		@test typeof(embedTraversal(Struct(),deepcopy(x),1,"New"))==Struct
@@ -140,43 +132,23 @@ end
 	end
 end
 
-# to test
-#@testset "embedTraversal Tests" begin
-#	square = Lar.cuboid([1,1])
-#	x = Lar.Struct([square])
-#	@test length(Lar.embedTraversal(Lar.Struct(),x,1,"New").body[2][1][1])==
-#	length(x.body[1][1][1])+1
-#	#in this case n=1, but generally:
-#	# length(length(embedTraversal(x,x,1,"New")=length(x.body[1][1][1])+n
-#	@test length(embedTraversal(deepcopy(x),deepcopy(x),3,"New").body[2][1][1])?==
-#	length(x.body[1][1][1])+3
-#	@test typeof(embedTraversal(deepcopy(x),deepcopy(x),1,"New"))==Struct
-#end
+@testset "embedStruct Tests" begin
+	square = Lar.cuboid([1,1])
+	x = Lar.Struct([square])
+	suffix="-New"
 
-# @testset "embedStruct Tests" begin
-# 	square = Lar.cuboid([1,1])
-# 	x = Lar.Struct([square])
-# 	suffix="-New"
-#
-# 	embedStruc(1)(x,suffix)
-# 	@test length(embedStruct(1)(x,"-New").body[1][1][1])==length(x.body[1][1][1])+1
-#
-# 	@test length(embedStruct(1)(x,suffix).body[1][1][1])==length(x.body[1][1][1])+1
-# 	#in this case n = 1, but generally:
-# 	#length(embedStruct(n)(x).body[1][1][1])=length(x.body[1][1][1])+n
-# 	@test length(embedStruct(3)(x,suffix).body[1][1][1])==length(x.body[1][1][1])+3
-# 	@test typeof(embedStruct(1)(x,suffix))==Struct
-# end
+	@test typeof(embedStruc(1)(deepcopy(x),suffix))==Struct
+	@test embedStruc(1)(deepcopy(x),suffix).category==x.category
+	@test embedStruc(1)(deepcopy(x),suffix).dim==x.dim+1
+	@test embedStruc(3)(deepcopy(x),suffix).dim==x.dim+3
+	@test embedStruc(1)(deepcopy(x),suffix).box[1][1]==x.box
 
-#@testset "embedStruct Tests" begin
-#	square = Lar.cuboid([1,1])
-#	x = Lar.Struct([square])
-#	@test length(Lar.embedStruct(1)(x).body[1][1][1])==length(x.body[1][1][1])+1
-#	#in this case n = 1, but generally:
-#	#length(embedStruct(n)(x).body[1][1][1])=length(x.body[1][1][1])+n
-#	@test length(Lar.embedStruct(3)(x).body[1][1][1])==length(x.body[1][1][1])+3
-#	@test typeof(Lar.embedStruct(1)(x))==Struct
-#end
+	# in questi tre casi n=1, n=3 e n=5, ma in generale:
+	# length(embedStruct(n)(x,suffix).body[1][1][1])=length(x.body[1][1])+4*n
+	@test length(embedStruc(1)(deepcopy(x),suffix).body[1][1][1])==length(x.body[1][1])+4*1
+	@test length(embedStruc(3)(deepcopy(x),suffix).body[1][1][1])==length(x.body[1][1])+4*3
+	@test length(embedStruc(5)(deepcopy(x),suffix).body[1][1][1])==length(x.body[1][1])+4*5
+end
 
 @testset "removeDups Tests" begin
 	CW1=[[0,1,2,3],[4,5,6,7],[0,1,4,5],[2,3,6,7],[0,2,4,6],[1,3,5,7],
