@@ -143,6 +143,10 @@ end
 	@test embedStruc(3)(deepcopy(x),suffix).dim==x.dim+3
 	@test embedStruc(1)(deepcopy(x),suffix).box[1][1]==x.box
 
+	# in questo caso n=2, dove n è la lunghezza del primo elemento del box di x,
+	# in generale: embedStruc(0)(x,suffix)[2]=n
+	@test embedStruc(0)(deepcopy(x),suffix)[2]==2
+
 	# in questi tre casi n=1, n=3 e n=5, ma in generale:
 	# length(embedStruct(n)(x,suffix).body[1][1][1])=length(x.body[1][1])+4*n
 	@test length(embedStruc(1)(deepcopy(x),suffix).body[1][1][1])==length(x.body[1][1])+4*1
