@@ -1,3 +1,5 @@
+using StaticArrays
+using LinearAlgebra
 using LinearAlgebraicRepresentation
 Lar = LinearAlgebraicRepresentation
 
