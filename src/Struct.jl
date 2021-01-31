@@ -34,7 +34,8 @@ end
 
 """
 	s(args::Array{Number,1}...)::Matrix
-Return an *affine transformation Matrix* in homogeneous coordinates. Such `scaling` Matrix has ``d+1`` rows and ``d+1`` columns, where ``d`` is the number of scaling parameters in the `args` array.
+Return an *affine transformation Matrix* in homogeneous coordinates. Such `scaling` Matrix has ``d+1`` rows
+and ``d+1`` columns, where ``d`` is the number of scaling parameters in the `args` array.
 # Examples
 ```julia
 julia> Lar.s(2,3)			# 2D scaling
@@ -316,7 +317,7 @@ mutable struct Struct
 		return self
 	end
 
-	function Struct(dat,name)
+	function Struct(data,name)
 		self = Struct()
 		self.body=[item for item in data]
 		self.box = box(self)
@@ -334,7 +335,6 @@ mutable struct Struct
 		self.category = string(category)
 		return self
 	end
-
 end
 
 	function name(self)
@@ -482,7 +482,7 @@ end
 	objBody = obj.body
 	# for sync o async?
 	@inbounds @sync for i=1:length(objBody)
-		if isa(objBody[i],Matrix)
+		if (isa(objBody[i],MMatrix) || isa(objBody[i],Matrix))
 			newMat = embedTraversalMatrix(objBody[i],n)
 			push!(cloned.body,[newMat])
 		elseif (isa(objBody[i],Tuple) || isa(objBody[i],Array))
@@ -601,7 +601,7 @@ end
 end
 
 @inline function box(model)
-	if isa(model,Matrix)
+	if (isa(model,MMatrix) || isa(model,Matrix))
 		return nothing
 	elseif isa(model,Struct)
 		listOfModels = evalStruct(model)
@@ -677,7 +677,7 @@ end
 """
 function checkStruct(lst)
 	obj = lst[1]
-	if isa(obj,Matrix)
+	if (isa(obj,MMatrix) || isa(obj,Matrix))
 		dim = size(obj,1)-1
 	elseif (isa(obj,Tuple) || isa(obj,Array))
 		dim = length(@view (obj[1][:,1]))
@@ -694,7 +694,7 @@ end
 function traversal(CTM::Matrix, stack, obj, scene)
 	#for sync o async?
 	@inbounds @sync for i in 1:length(obj.body)
-		if isa(obj.body[i],Matrix)
+		if (isa(obj.body[i],MMatrix) || isa(obj.body[i],Matrix))
 			CTM = CTM*obj.body[i]
 		elseif (isa(obj.body[i],Tuple) || isa(obj.body[i],Array)) && (length(obj.body[i])>=2)
 			l = apply(CTM, obj.body[i])
@@ -713,7 +713,7 @@ end
 """
 
 function evalStruct(self)
-	dim::Int = checkStruct(self.body)
+	dim = checkStruct(self.body)
 	CTM = Matrix{Float64}(LinearAlgebra.I, dim+1, dim+1)
 	return traversal(CTM, [], self, [])
 end
