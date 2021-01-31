@@ -135,7 +135,7 @@ julia> Lar.r(1,1,1)		# 3D rotation about the ``x=y=z`` axis, with angle ``1.7320
 
 @inline function r2D(args)
 	angle = args[1]; COS = cos(angle); SIN = sin(angle)
-	mat = MMatrix{3,3,Float64}(1I)
+	mat = Matrix{Float64}(LinearAlgebra.I, 3, 3)
 	mat[1,1] = COS;    mat[1,2] = -SIN;
 	mat[2,1] = SIN;    mat[2,2] = COS;
 	return mat
@@ -171,7 +171,7 @@ end
 end
 
 @inline function r3D(args)
-	mat = MMatrix{4,4,Float64}(1I)
+	mat = Matrix{Float64}(LinearAlgebra.I, 4, 4)
 	angle = norm(args);
 	if angle != 0.0
 		 axis = args #normalize(args)
@@ -478,10 +478,11 @@ end
 	return
 end
 
-@inline function embedTraversal(cloned::Lar.Struct,obj::Lar.Struct,n::Int,suffix::String)
+@inline function embedTraversal(cloned,obj,n,suffix)
 	objBody = obj.body
-	@inbounds @async for i=1:length(objBody)
-		if isa(objBody[i],MMatrix)
+	# for sync o async?
+	@inbounds @sync for i=1:length(objBody)
+		if isa(objBody[i],Matrix)
 			newMat = embedTraversalMatrix(objBody[i],n)
 			push!(cloned.body,[newMat])
 		elseif (isa(objBody[i],Tuple) || isa(objBody[i],Array))
@@ -581,7 +582,7 @@ end
 	box(model)
 """
 
-function evalBox(listOfModels)
+@inline function evalBox(listOfModels)
 	theMin,theMax = box(listOfModels[1])
 	for theModel in listOfModels[2:end]
 		modelMin,modelMax= box(theModel)
@@ -599,17 +600,17 @@ function evalBox(listOfModels)
 	return theMin,theMax
 end
 
-function box(model)
+@inline function box(model)
 	if isa(model,Matrix)
 		return nothing
 	elseif isa(model,Struct)
 		listOfModels = evalStruct(model)
-		#dim = checkStruct(listOfModels)
 		if listOfModels == []
 			return model.box
 		else
 			theMin,theMax = evalBox(listOfModels)
 		end
+
 		return [theMin,theMax]
 
 	elseif (isa(model,Tuple) || isa(model,Array)) && (length(model)>=2)
@@ -617,6 +618,7 @@ function box(model)
 		theMin = minimum(V, dims=2)
 		theMax = maximum(V, dims=2)
 	end
+
 	return [theMin,theMax]
 end
 
@@ -651,7 +653,6 @@ end
 # 		theMin = minimum(V, dims=2)
 # 		theMax = maximum(V, dims=2)
 # 	end
-#
 # 	return [theMin,theMax]
 # end
 
@@ -671,7 +672,6 @@ function apply(affineMatrix, larmodel)
 	return larmodel
 end
 
-
 """
 	checkStruct(lst)
 """
@@ -680,7 +680,7 @@ function checkStruct(lst)
 	if isa(obj,Matrix)
 		dim = size(obj,1)-1
 	elseif (isa(obj,Tuple) || isa(obj,Array))
-		dim = length(obj[1][:,1])
+		dim = length(@view (obj[1][:,1]))
 
 	elseif isa(obj,Struct)
 		dim = length(obj.box[1])
@@ -691,8 +691,9 @@ end
 """
 	traversal(CTM,stack,obj,scene=[])
 """
-function traversal(CTM::Matrix, stack, obj, scene=[])
-	for i = 1:length(obj.body)
+function traversal(CTM::Matrix, stack, obj, scene)
+	#for sync o async?
+	@inbounds @sync for i in 1:length(obj.body)
 		if isa(obj.body[i],Matrix)
 			CTM = CTM*obj.body[i]
 		elseif (isa(obj.body[i],Tuple) || isa(obj.body[i],Array)) && (length(obj.body[i])>=2)
@@ -710,9 +711,16 @@ end
 """
 	evalStruct(self)
 """
-function evalStruct(self::Struct)
-	dim = checkStruct(self.body)
-   	CTM, stack = Matrix{Float64}(LinearAlgebra.I, dim+1, dim+1), []
-   	scene = traversal(CTM, stack, self, [])
-	return scene
+
+function evalStruct(self)
+	dim::Int = checkStruct(self.body)
+	CTM = Matrix{Float64}(LinearAlgebra.I, dim+1, dim+1)
+	return traversal(CTM, [], self, [])
 end
+
+# function evalStruct(self::Struct)
+# 	dim = checkStruct(self.body)
+#    	CTM, stack = Matrix{Float64}(LinearAlgebra.I, dim+1, dim+1), []
+#    	scene = traversal(CTM, stack, self, [])
+# 	return scene
+# end
